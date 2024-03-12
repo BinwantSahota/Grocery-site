@@ -87,7 +87,7 @@ def formTest(request):
     else:
         order_item_form = OrderItemForm()
         interest_form = InterestForm()
-    return render(request, 'myapp/test1.html', {'order_item_form': order_item_form, 'interest_form': interest_form})
+    return render(request, 'myapp/form.html', {'order_item_form': order_item_form, 'interest_form': interest_form})
 
 
 

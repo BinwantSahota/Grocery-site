@@ -6,16 +6,19 @@
     <title> Online Grocery Store - {% block title %} Welcome! {% endblock %}</title>
 </head>
 <body>
+<nav>
+        <ul>
+            <li><a href="{% url 'index'%}">Home</a></li>
+            <li><a href="{% url 'about'%}">About</a></li>
+            <li><a href="{% url 'items'%}">Items Page</a></li>
+            <li><a href="{% url 'placeorder'%}">Place Order</a></li>
+            <li><a href="{% url 'itemsearch'%}">Item Search</a></li>
+            <li><a href="{% url 'team'%}">Developed By</a></li>
+        </ul>
+    </nav>
 <div>
     <h1>{% block myhdg %} Welcome to our online grocery store {% endblock %}</h1>
     {% block body_block %}*** {% endblock %}
-</div>
-<div>
-    <ul>
-        <li class="hbar1"><a href="http://127.0.0.1:8000/about/"> Find out about this site </a></li>
-        <li class="hbar1"><a href = "{% url 'index'%}"> Click here to return to main page </a><br/></li>
-        <li><a href="http://127.0.0.1:8000/items">items page</a></li>     
-    </ul>
 </div>
 </body>
 </html>
