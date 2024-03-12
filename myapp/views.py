@@ -5,7 +5,7 @@ from django.views import View
 from .models import Type, Item, labmember
 from django.shortcuts import get_object_or_404
 import calendar
-from .forms import OrderItemForm, InterestForm
+from .forms import OrderItemForm, InterestForm, ItemSearchForm
 
 # Create your views here.
 def index(request):
@@ -96,57 +96,64 @@ def items(request):
     return render(request, 'myapp/items.html', {'itemlist': itemlist})
 
 def placeorder(request):
-    message ='You can place your order here.'
-    return render(request, 'myapp/placeorder.html',{'message': message})
+    msg = ''
+    itemlist = Item.objects.all()
+
+    if request.method == 'POST':
+        form = OrderItemForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            if order.quantity <= order.item.stock:
+                # order.save()
+                order.item.stock -= order.quantity
+                order.item.save()
+                msg = 'Your order has been placed successfully.'
+            else:
+                msg = 'We do not have sufficient stock to fill your order.'
+                return render(request, 'myapp/order_response.html', {'msg': msg})
+    else:
+        form = OrderItemForm()
+    return render(request, 'myapp/placeorder.html', {'form': form, 'msg': msg, 'itemlist': itemlist})
 
 
+def item_search(request):
+    price = None
+    if request.method == 'POST':
+        form = ItemSearchForm(request.POST)
+        if form.is_valid():
+            item = form.cleaned_data['item']
+            price = item.price
+    else:
+        form = ItemSearchForm()
+
+    return render(request, 'myapp/item_search.html', {'form': form, 'price': price})
 
 
+def itemdetail(request, item_id):
+    # Retrieve the item based on item_id
+    item = get_object_or_404(Item, pk=item_id)
 
+    # Initialize message variable
+    message = ''
 
+    # Check if the item is available
+    if not item.available:
+        message = 'This item is currently not available.'
 
+    # If a POST request, process the interest form
+    if request.method == 'POST':
+        form = InterestForm(request.POST)
+        if form.is_valid():
+            # Save the form data (record user interest)
+            form.save()
+            # Update interested count for the item
+            item.interested += 1
+            item.save()
+            # Redirect or display a success message
+            return render(request, 'myapp/itemdetail.html',
+                          {'item': item, 'form': form, 'message': 'Thank you for showing your interest!'})
+    else:
+        # Create a new instance of the interest form
+        form = InterestForm()
 
-
-
-
-# Difference between FBV and CBV explained:
-
-# 1. Function-Based View (FBV) is a simple function that takes a request and returns a response.
-# 2. Class-Based View (CBV) is a class that inherits from Django's View class and has methods (like get) for different HTTP methods.
-# 3. In FBV, the logic is directly in the function.
-# 4. In CBV, the logic is encapsulated in methods (e.g., get method for handling HTTP GET requests).
-# 5. CBV allows for more organized code with different methods for different HTTP methods.
-# 6. CBV can be extended more easily, for example, by adding additional methods for different actions.
-# 7. CBV is often more reusable as the behavior is encapsulated within the class.
-
-
-
-
-# a. Client.objects.filter(last_name='Mir')
-# b. Client.objects.filter(shipping_address__contains = '45')
-# c. Client.objects.filter(city = 'WD').filter(shipping_address__contains = 'street')
-# d. Client.objects.filter(city= 'CH'); Client.objects.filter(city= 'TO')
-# e. Client.objects.exclude(city= 'WD')
-# f. type = Type.objects.get(name='Bakery')
-# Client.objects.filter(interested_in = type)
-# g. Item.objects.filter(price__lt = 5.0)
-# h. Item.objects.filter(available = False)
-# i. Client.objects.get(username = 'saja').interested_in.all()
-# j. Item.objects.filter(price__gt = '12').filter(stock__lt = '130')
-# k. OrderItem.objects.get(pk = 2).client.first_name
-# l. alltype = Type.objects.all()
-# alltype.__len__()
-# alltype[2]
-# m. for i in Type.objects.all():
-#     print(i)
-# n.coffee_item = Item.objects.get(name = 'Coffee')
-# OrderItem.objects.filter(item = coffee_item, status = 1)
-# o. OrderItem.objects.get(status = 1).client
-# p. Item.objects.filter(price__gt = 5.00).filter(price__lt = 15.00)
-# q. Client.objects.filter(orderitem__isnull=False).filter(city__in=['WD','CH'])
-# r. from django.db.models import Avg
-# type_instance = Type.objects.get(name='Bakery')
-# Item.objects.filter(type=type_instance).aggregate(average_price=Avg('price'))['average_price']
-# s. from django.db.models import Sum
-# type_instance = Type.objects.get(name='Bakery')
-# Item.objects.filter(type=type_instance).aggregate(total_items=Sum('stock'))[    'total_items']
+    return render(request, 'myapp/itemdetail.html', {'item': item, 'form': form, 'message': message})

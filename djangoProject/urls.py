@@ -17,6 +17,7 @@ urlpatterns = [
     path('team/', labmemberdetails.as_view(), name='team'),
     path('formTest/', views.formTest, name='orderInterest'),
     path('items', views.items, name='items'),
-    path('placeorder/', views.placeorder, name='placeorder')
+    path('placeorder/', views.placeorder, name='placeorder'),
+    path("items/<int:item_id>/", views.itemdetail, name='item_detail'),
 ]
 

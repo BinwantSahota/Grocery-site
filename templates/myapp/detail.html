@@ -1,25 +1,14 @@
-<!-- templates/myapp/detail.html -->
 {% extends 'myapp/base.html' %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ type_obj.name }} Details</title>
-</head>
 
 {% block body_block %}
-<body>
-    <h1>{{ type_obj.name }} Details</h1>
-
-    <p>{{ type_obj.name }} has the following items:</p>
-    <ul>
-        {% for item in items %}
-            <li>{{ item.name }}</li>
-        {% endfor %}
-    </ul>
-
-    <p><a href="{% url 'index'%}">Index Page</a></p>
-</body>
+<strong>{{ selected_type }}</strong>
+{% if items %}
+    {% for item in items  %}
+        <li>{{item}}</li>   
+    {% endfor %}
+{% else %}
+    <br>
+    <strong> No items in this Category! </strong>
+{% endif %}
+<p><a href="{% url 'index'%}">Index Page</a></p>
 {% endblock %}
-</html>
